@@ -1,0 +1,1 @@
+$0.textContent.trim().split('\n').map(n => parseInt(n, 10)).reduce((a, b) => a + b, 0)

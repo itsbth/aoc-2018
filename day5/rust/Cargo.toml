@@ -1,0 +1,7 @@
+[package]
+name = "rust"
+version = "0.1.0"
+authors = ["Bjørn Tore Håvie <bjorn.haavie@inonit.no>"]
+
+[dependencies]
+rayon = "1.0.3"

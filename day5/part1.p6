@@ -1,14 +1,12 @@
 use v6.c;
 
-my $polymer = 'input'.IO.slurp;
-my @ul = ('A'..'Z').map: { $_ ~ .lc };
-my @lu = ('a'..'z').map: { $_ ~ .uc };
-
-my $l = 0;
-
-while ($l ≠ $polymer.chars) {
-  say "$l -> $($polymer.chars)";
-  $l = $polymer.chars;
-  $polymer .=subst(rx/@ul|@lu/, '', :g);
+my @a = 'input'.IO.slurp.comb>>.ord;
+my @o = [0];
+for @a -> $c {
+  if (@o[* - 1] - $c).abs == 32 {
+    @o.pop;
+  } else {
+    @o.push($c);
+  }
 }
-say $polymer.chars;
+say @o.elems - 1;

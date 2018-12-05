@@ -1,8 +1,8 @@
 extern crate rayon;
 
+use rayon::prelude::*;
 use std::fs::File;
 use std::io::prelude::*;
-use rayon::prelude::*;
 
 fn reduce(mut data: Vec<u8>, mut out: Vec<u8>) -> Vec<u8> {
     let mut change = true;
@@ -40,20 +40,37 @@ fn reduce(mut data: Vec<u8>, mut out: Vec<u8>) -> Vec<u8> {
     out
 }
 
+fn reduce_fast(data: &Vec<u8>) -> usize {
+    let mut buff = Vec::with_capacity(data.len() / 5);
+    buff.push(data[0]);
+    for ch in data.iter().skip(1) {
+        if buff.len() > 0 && (*ch as i32 - buff[buff.len() - 1] as i32).abs() == 32 {
+            buff.pop();
+        } else {
+            buff.push(*ch);
+        }
+    }
+    buff.len()
+}
+
 fn main() {
-    let mut inpf = File::open("../input").expect("File is missing");
+    let mut inpf = File::open("input").expect("File is missing");
     let mut data = Vec::new();
     inpf.read_to_end(&mut data).expect("Error reading");
 
-    let out: Vec<u8> = Vec::with_capacity(data.len()); // a bit overkill, but meh
-    let out = reduce(data.clone(), out);
-    println!("Part 1: {}", out.len());
-    let results: Vec<_> = (65u8 .. 91u8).into_par_iter().map(|ch| {
-        let fd: Vec<u8> = data.iter().cloned().filter(|cc| *cc != ch && *cc != ch + 32).collect();
-        let len = fd.len();
-        let out = reduce(fd, Vec::with_capacity(len));
-        (ch, out.len())
-    }).collect();
+    let out = reduce_fast(&data);
+    println!("Part 1: {}", out);
+    let results: Vec<_> = (65u8..91u8)
+        .into_par_iter()
+        .map(|ch| {
+            let fd: Vec<u8> = data
+                .iter()
+                .cloned()
+                .filter(|cc| *cc != ch && *cc != ch + 32)
+                .collect();
+            let out = reduce_fast(&fd);
+            (ch, out)
+        }).collect();
     for (ch, count) in results.iter() {
         println!("{}: {}", String::from_utf8_lossy(&[*ch]), count);
     }
